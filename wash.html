@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Wash Tracking — PLM{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Wash Tracking</h1>
+  <button class="btn btn-primary" onclick="openModal('add-modal')">+ Add Wash Record</button>
+</div>
+<div class="table-container" style="margin:12px 24px;">
+  <table class="data-table">
+    <thead><tr><th>Style Code</th><th>Customer</th><th>Season</th><th>Color</th><th>Wash Type</th><th>Sent</th><th>Received</th><th>Result</th></tr></thead>
+    <tbody>
+      {% for w in records %}
+      <tr>
+        <td style="color:var(--accent); font-weight:600;">{{ w.style_code or '—' }}</td>
+        <td>{{ w.customer or '—' }}</td><td>{{ w.season or '—' }}</td><td>{{ w.color or '—' }}</td>
+        <td><span class="badge badge-blue">{{ w.wash_type or '—' }}</span></td>
+        <td style="font-size:11px; color:var(--text-muted);">{{ w.sent_date or '—' }}</td>
+        <td style="font-size:11px; color:var(--text-muted);">{{ w.received_date or '—' }}</td>
+        <td>
+          {% set rc = {'Pass':'badge-green','Fail':'badge-danger','Pending':'badge-muted','Rework':'badge-warning'} %}
+          <span class="badge {{ rc.get(w.result or 'Pending', 'badge-muted') }}">{{ w.result or 'Pending' }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="modal-overlay" id="add-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-header"><span>New Wash Record</span><button class="modal-close" onclick="closeModal('add-modal')">✕</button></div>
+    <div class="modal-body">
+      <form method="post" action="/wash/create" id="add-form">
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Style Code</label><input class="form-control" name="style_code"></div>
+          <div class="form-group"><label class="form-label">Customer</label><input class="form-control" name="customer"></div>
+          <div class="form-group"><label class="form-label">Season</label><input class="form-control" name="season"></div>
+          <div class="form-group"><label class="form-label">Color</label><input class="form-control" name="color"></div>
+          <div class="form-group">
+            <label class="form-label">Wash Type</label>
+            <select class="form-control" name="wash_type">
+              {% for t in ['BASIC','NON-WASH','RFD/OD','DENIM -CRITICAL','DENIM - NON CRITICAL','NON-DENIM CRITICAL','TBC'] %}<option>{{ t }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Result</label>
+            <select class="form-control" name="result">
+              {% for r in ['Pending','Pass','Fail','Rework'] %}<option>{{ r }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Sent Date</label><input class="form-control" name="sent_date" type="date"></div>
+          <div class="form-group"><label class="form-label">Received Date</label><input class="form-control" name="received_date" type="date"></div>
+          <div class="form-group full"><label class="form-label">Comments</label><textarea class="form-control" name="comments"></textarea></div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-muted" onclick="closeModal('add-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="document.getElementById('add-form').submit()">Save Record</button>
+    </div>
+  </div>
+</div>
+<script>
+function openModal(id){document.getElementById(id).style.display='flex';}
+function closeModal(id){document.getElementById(id).style.display='none';}
+</script>
+{% endblock %}

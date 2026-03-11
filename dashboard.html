@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — PLM{% endblock %}
+{% block content %}
+
+<div class="welcome-strip">
+  <h2>Welcome back, {{ user.full_name }} 👋</h2>
+  <span class="badge badge-blue">{{ user.role }}</span>
+  <span style="margin-left:auto; font-size:11px; color:var(--text-muted);" id="timestamp"></span>
+</div>
+
+<!-- KPI Cards -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-icon" style="color:#06B6D4">🎨</div>
+    <div class="kpi-value" style="color:#06B6D4">{{ stats.total_styles }}</div>
+    <div class="kpi-label">Total Styles</div>
+    <div class="kpi-bar" style="background:#06B6D4"></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon" style="color:#3B82F6">👕</div>
+    <div class="kpi-value" style="color:#3B82F6">{{ stats.total_samples }}</div>
+    <div class="kpi-label">Total Samples</div>
+    <div class="kpi-bar" style="background:#3B82F6"></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon" style="color:#F59E0B">🔍</div>
+    <div class="kpi-value" style="color:#F59E0B">{{ stats.pending_qa }}</div>
+    <div class="kpi-label">QA Pending</div>
+    <div class="kpi-bar" style="background:#F59E0B"></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon" style="color:#10B981">✅</div>
+    <div class="kpi-value" style="color:#10B981">{{ stats.approved }}</div>
+    <div class="kpi-label">Approved</div>
+    <div class="kpi-bar" style="background:#10B981"></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon" style="color:#34D399">📦</div>
+    <div class="kpi-value" style="color:#34D399">{{ stats.dispatched }}</div>
+    <div class="kpi-label">Dispatched</div>
+    <div class="kpi-bar" style="background:#34D399"></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon" style="color:#EF4444">❌</div>
+    <div class="kpi-value" style="color:#EF4444">{{ stats.rejected }}</div>
+    <div class="kpi-label">Rejected</div>
+    <div class="kpi-bar" style="background:#EF4444"></div>
+  </div>
+</div>
+
+<!-- Middle row -->
+<div class="two-col section-padding">
+  <!-- Pipeline by dept -->
+  <div class="card">
+    <div class="card-header">📍 Sample Pipeline by Department</div>
+    <div class="card-body">
+      {% set dept_colors = {'Design':'#3B82F6','Sampling':'#F59E0B','Washing':'#06B6D4','Cutting':'#F97316','Stitching':'#A78BFA','Finishing':'#06B6D4','QA':'#10B981','Dispatch':'#34D399','Brand':'#F472B6'} %}
+      {% set total = stats.by_dept.values()|sum or 1 %}
+      {% for dept in ['Design','Sampling','Washing','Cutting','Stitching','Finishing','QA','Dispatch','Brand'] %}
+      {% set count = stats.by_dept.get(dept, 0) %}
+      {% set color = dept_colors.get(dept, '#94A3B8') %}
+      <div class="progress-row">
+        <span class="progress-label" style="font-size:12px;">{{ dept }}</span>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fg" style="width:{{ [count * 100 // total, 4]|max if count else 0 }}%; background:{{ color }};"></div>
+        </div>
+        <span class="progress-count" style="color:{{ color }}; font-weight:600;">{{ count }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Style status -->
+  <div class="card">
+    <div class="card-header">📊 Style Status Overview</div>
+    <div class="card-body">
+      {% set status_colors = {'Design Intent':'#06B6D4','Sampling':'#F59E0B','QA':'#A78BFA','Approved':'#10B981','Dispatched':'#34D399','Cancelled':'#EF4444'} %}
+      {% set total_s = stats.style_status.values()|sum or 1 %}
+      {% for status, count in stats.style_status.items() %}
+      {% set color = status_colors.get(status, '#94A3B8') %}
+      <div style="display:flex; align-items:center; padding:6px 0; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:{{ color }};display:inline-block;"></span>
+          <span style="font-size:13px;">{{ status }}</span>
+        </div>
+        <span style="color:{{ color }}; font-weight:600; font-size:13px;">{{ count }} &nbsp;({{ count * 100 // total_s }}%)</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="section-padding" style="padding-top:0;">
+  <div class="card">
+    <div class="card-header">🕐 Recent Activity</div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Sample ID</th><th>From</th><th>To</th><th>Status</th><th>By</th><th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in stats.recent_movements %}
+          <tr>
+            <td><span style="color:var(--accent); font-weight:600;">{{ m.sample_code }}</span></td>
+            <td style="color:var(--text-muted);">{{ m.from_dept or '—' }}</td>
+            <td>{{ m.to_dept }}</td>
+            <td>
+              {% set sc = {'Approved':'badge-green','Rejected':'badge-danger','In Progress':'badge-warning','QA Hold':'badge-warning','Pending':'badge-muted','Dispatched':'badge-teal'} %}
+              <span class="badge {{ sc.get(m.status, 'badge-muted') }}">{{ m.status }}</span>
+            </td>
+            <td style="color:var(--text-muted);">{{ m.user_name or '—' }}</td>
+            <td style="color:var(--text-muted); font-size:11px;">{{ m.timestamp[:16] if m.timestamp else '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('timestamp').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+</script>
+{% endblock %}

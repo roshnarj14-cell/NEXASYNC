@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sign In — Aquarelle India PLM</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body style="display:block; overflow:auto;">
+<div class="login-wrap">
+  <!-- Left branding panel -->
+  <div class="login-left">
+    <div style="font-size:56px; margin-bottom:8px;">👗</div>
+    <h1 style="font-size:22px; font-weight:800; color:var(--text);">APPAREL PLM</h1>
+    <p style="color:var(--text-muted); font-size:13px; margin-top:4px;">Product Lifecycle Management</p>
+
+    <div class="login-features">
+      <div class="feature-row"><span>🔍</span> QR-Based Sample Traceability</div>
+      <div class="feature-row"><span>🏭</span> Full Department Workflow</div>
+      <div class="feature-row"><span>📊</span> Real-Time Tracking Dashboard</div>
+      <div class="feature-row"><span>🔐</span> Role-Based Access Control</div>
+    </div>
+
+    <p style="margin-top:auto; padding-top:40px; font-size:10px; color:var(--border);">v2.0 · © 2025 Aquarelle India PLM</p>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="login-right">
+    <div class="login-form-box">
+      <h2 style="font-size:26px; font-weight:700; margin-bottom:6px;">Welcome Back</h2>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:28px;">Sign in to your PLM account</p>
+
+      {% if error %}
+      <div style="background:#2e0d0d; border:1px solid var(--danger); color:var(--danger); padding:10px 14px; border-radius:6px; font-size:13px; margin-bottom:16px;">
+        ✕ &nbsp;{{ error }}
+      </div>
+      {% endif %}
+
+      <form method="post" action="/login">
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label">USERNAME</label>
+          <input class="form-control" name="username" placeholder="Enter username" required autofocus>
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label class="form-label">PASSWORD</label>
+          <input class="form-control" name="password" type="password" placeholder="Enter password" required>
+        </div>
+        <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; margin-top:16px; font-size:14px; font-weight:700;" type="submit">
+          SIGN IN &nbsp;→
+        </button>
+      </form>
+
+      <!-- Demo accounts -->
+      <div class="demo-box" style="margin-top:20px;">
+        <p style="font-size:11px; color:var(--text-muted); margin-bottom:8px; font-weight:600;">DEMO ACCOUNTS</p>
+        {% for u, p, r in [('admin','admin123','Admin'),('designer1','pass123','Designer'),('merch1','pass123','Merchandiser'),('qa1','pass123','QA')] %}
+        <div class="demo-row" onclick="document.querySelector('[name=username]').value='{{u}}'; document.querySelector('[name=password]').value='{{p}}'">
+          <span>{{ u }} / {{ p }}</span>
+          <span class="demo-role">[{{ r }}]</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Aquarelle India PLM{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-box">AQ</div>
+      <div class="logo-text">
+        <strong>Aquarelle India</strong>
+        <span>PLM System</span>
+      </div>
+    </div>
+
+    <div class="user-strip">
+      <div class="user-avatar">{{ user.full_name[:2].upper() }}</div>
+      <div class="user-info">
+        <strong>{{ user.full_name }}</strong>
+        <span>{{ user.role }}</span>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <a href="/dashboard" class="nav-item {% if active == 'dashboard' %}active{% endif %}">
+      <span class="icon">🏠</span> Dashboard
+    </a>
+
+    <div class="nav-section-label">PRODUCT DEV</div>
+    <a href="/styles" class="nav-item {% if active == 'styles' %}active{% endif %}">
+      <span class="icon">🎨</span> Styles
+    </a>
+    <a href="/samples" class="nav-item {% if active == 'samples' %}active{% endif %}">
+      <span class="icon">👕</span> Samples
+    </a>
+    <a href="/wash" class="nav-item {% if active == 'wash' %}active{% endif %}">
+      <span class="icon">🌊</span> Wash Tracking
+    </a>
+    <a href="/qa" class="nav-item {% if active == 'qa' %}active{% endif %}">
+      <span class="icon">🔍</span> QA
+    </a>
+    <a href="/dispatch" class="nav-item {% if active == 'dispatch' %}active{% endif %}">
+      <span class="icon">📦</span> Dispatch
+    </a>
+
+    {% if user.role in ['Admin', 'Merchandiser'] %}
+    <div class="nav-section-label">ADMIN</div>
+    <a href="/brands" class="nav-item {% if active == 'brands' %}active{% endif %}">
+      <span class="icon">🏷</span> Brands
+    </a>
+    <a href="/merchants" class="nav-item {% if active == 'merchants' %}active{% endif %}">
+      <span class="icon">👤</span> Merchants
+    </a>
+    {% endif %}
+
+    {% if user.role in ['Admin', 'Merchandiser', 'Designer'] %}
+    <a href="/reports" class="nav-item {% if active == 'reports' %}active{% endif %}">
+      <span class="icon">📊</span> Reports
+    </a>
+    {% endif %}
+
+    {% if user.role == 'Admin' %}
+    <a href="/users" class="nav-item {% if active == 'users' %}active{% endif %}">
+      <span class="icon">🔐</span> Users
+    </a>
+    {% endif %}
+
+    <div class="nav-logout">
+      <form action="/logout" method="post">
+        <button class="logout-btn" type="submit">↩ &nbsp; Sign Out</button>
+      </form>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="page-body" id="page-body">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    function showToast(message, color='#10B981') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.style.background = color;
+      t.textContent = message;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    {% if request.session.get('flash') %}
+    showToast("{{ request.session.pop('flash') }}");
+    {% endif %}
+  </script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
